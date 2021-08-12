@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,14 +12,42 @@ public class PlayerController : MonoBehaviour
     private Vector2Int _currentPosInMap = default;
     private bool _canMove = true;
 
-    public void Initialize(WallState[,] map, float mapCellSize)
+
+    private Vector2Int WorldToMapCoords(Vector2 source) {
+
+        if (source.y < 0)
+        {
+            if (source.x > 0) return _currentPosInMap = new Vector2Int(_map.GetLength(0) / 2 + 1, _map.GetLength(1) / 2 - 1);
+            else return _currentPosInMap = new Vector2Int(_map.GetLength(0) / 2, _map.GetLength(1) / 2 - 1);
+        }
+        else
+        {
+            if (source.x > 0) return _currentPosInMap = new Vector2Int(_map.GetLength(0) / 2 + 1, _map.GetLength(1) / 2);
+            else return _currentPosInMap = new Vector2Int(_map.GetLength(0) / 2, _map.GetLength(1) / 2);
+        }        
+    }
+
+
+    public void Initialize(WallState[,] map, float mapCellSize, Vector2 startPosition)
     {
         _map = map;
         _canMove = true;
         _mapCellSize = mapCellSize;
 
-        transform.position = new Vector2(mapCellSize / 2, mapCellSize / 2);
-        _currentPosInMap = new Vector2Int(_map.GetLength(0) / 2 + 1, _map.GetLength(1) / 2);
+        //transform.position = new Vector2(_mapCellSize / 2, _mapCellSize / 2);
+        //_currentPosInMap = new Vector2Int(_map.GetLength(0) / 2 + 1, _map.GetLength(1) / 2);
+        
+        transform.position = startPosition;
+        _currentPosInMap = WorldToMapCoords(startPosition);
+
+    }
+
+    public void ReInitialize(Vector2 startPosition) {
+
+        _canMove = true;
+        transform.position = startPosition;
+        _currentPosInMap = WorldToMapCoords(startPosition);
+
 
     }
 
@@ -32,24 +60,20 @@ public class PlayerController : MonoBehaviour
         }
 
         _canMove = true;
-
-        //if (_currentPosInMap.x < _map.GetLength(0) && _currentPosInMap.y < _map.GetLength(1))
-        //Debug.Log(_map[_currentPosInMap.x, _currentPosInMap.y] + "| i = " + _currentPosInMap.x + "  j = " + _currentPosInMap.y);
-
         yield return null;    
     }
 
 
     private void Update()
     {
-        if (!_canMove) return;
+        if (!_canMove || GameManager.Instance.Pause) return;
 
         try
         {
 
             if (_currentPosInMap.x >= _map.GetLength(0) || _currentPosInMap.y >= _map.GetLength(1))
             {
-                SceneManager.LoadScene(0);
+                GameManager.Instance.RestartGame();
             }
             else if (Input.GetButton("Left") && !_map[_currentPosInMap.x, _currentPosInMap.y].HasFlag(WallState.LEFT))
             {
@@ -81,7 +105,7 @@ public class PlayerController : MonoBehaviour
         }
         catch (Exception ex) {
 
-            SceneManager.LoadScene(0);              
+            GameManager.Instance.RestartGame();
         }
 
 
