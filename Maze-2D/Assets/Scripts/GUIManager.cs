@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 
 public class GUIManager : MonoBehaviour
@@ -10,9 +12,13 @@ public class GUIManager : MonoBehaviour
     public const int MainMenuScene = 0;
     public const int GameSessionScene = 1;
 
+    public static GUIManager Instance { get; private set; } = null;
+
     [SerializeField] private RectTransform _mainMenu = null;
     [SerializeField] private RectTransform _settingsMenu = null;
     [SerializeField] private Slider _difficultySlider = null;
+    [SerializeField] private Button _settingsButton = null;
+    [SerializeField] private ToggleGroup _playerColors = null;
     [SerializeField] private float _buttonSpeed = 2.0f;
 
     [SerializeField] private MovingConstraints _menuPositions = default;
@@ -22,18 +28,18 @@ public class GUIManager : MonoBehaviour
 
         public RectTransform Left;
         public RectTransform Center;
-        public RectTransform Right;    
+        public RectTransform Right;
     }
 
 
     public void StartGame() {
 
-        SceneManager.LoadScene(GameSessionScene);    
+        SceneManager.LoadScene(GameSessionScene);
     }
 
     public void ExitGame()
-    {        
-        Application.Quit();        
+    {
+        Application.Quit();
     }
 
     private IEnumerator Move(RectTransform current, RectTransform target, Action callback = null) {
@@ -46,7 +52,7 @@ public class GUIManager : MonoBehaviour
 
         callback?.Invoke();
 
-        yield return null;    
+        yield return null;
     }
 
 
@@ -54,7 +60,8 @@ public class GUIManager : MonoBehaviour
 
         StartCoroutine(Move(_mainMenu, _menuPositions.Left, () => _mainMenu.gameObject.SetActive(false)));
         _settingsMenu.gameObject.SetActive(true);
-        StartCoroutine(Move(_settingsMenu, _menuPositions.Center));    
+        StartCoroutine(Move(_settingsMenu, _menuPositions.Center));
+        EventSystem.current.SetSelectedGameObject(_difficultySlider.gameObject);
     }
 
     public void ViewMainMenu()
@@ -62,6 +69,7 @@ public class GUIManager : MonoBehaviour
         StartCoroutine(Move(_settingsMenu, _menuPositions.Right, () => _settingsMenu.gameObject.SetActive(false)));
         _mainMenu.gameObject.SetActive(true);
         StartCoroutine(Move(_mainMenu, _menuPositions.Center));
+        EventSystem.current.SetSelectedGameObject(_settingsButton.gameObject);
     }
 
     public void SetDifficultyLevel(Slider difficultySlider)
@@ -70,13 +78,43 @@ public class GUIManager : MonoBehaviour
     }
 
     public void ChangeDifficultyLevel(Slider difficultySlider)
-    {        
+    {
         GameManager.DifficultyLevel = (Difficulty)difficultySlider.value;
+    }
+
+    public void SetPlayerColor(ToggleGroup _toggleGroup) {
+
+        List<Toggle> toggles = new List<Toggle>(_toggleGroup.transform.GetComponentsInChildren<Toggle>(true));
+       
+        foreach (Toggle currentToggle in toggles) {
+
+            Debug.Log(currentToggle);
+
+            if (currentToggle.transform.GetSiblingIndex() == GameManager.PlayerCustoms.ColorIndex) {
+
+                currentToggle.isOn = true;
+                break;
+            }
+            
+        }
+
+
+    }
+
+    public void ChangePlayerColor(PlayerColorToggle toggle) {
+
+        if (toggle.Info.isOn) GameManager.PlayerCustoms = new PlayerCustomisations() { 
+            
+            RGBAColor = toggle.Sprite.color, 
+            ColorIndex = toggle.transform.GetSiblingIndex() 
+        };         
     }
 
     private void Awake()
     {
+        Instance = this;
         SetDifficultyLevel(_difficultySlider);
+        SetPlayerColor(_playerColors);
     }
 
 }

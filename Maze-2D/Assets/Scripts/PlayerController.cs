@@ -6,12 +6,16 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float _speed = 5.0f;
+    [SerializeField] private SpriteRenderer _spriteRender = null;
 
     private WallState[,] _map = null;
     private float _mapCellSize = default;
     private Vector2Int _currentPosInMap = default;
     private bool _canMove = true;
 
+    
+    public SpriteRenderer Sprite { get { return _spriteRender; } }    
+   
 
     private Vector2Int WorldToMapCoords(Vector2 source) {
 
@@ -33,7 +37,7 @@ public class PlayerController : MonoBehaviour
         _map = map;
         _canMove = true;
         _mapCellSize = mapCellSize;
-
+       
         //transform.position = new Vector2(_mapCellSize / 2, _mapCellSize / 2);
         //_currentPosInMap = new Vector2Int(_map.GetLength(0) / 2 + 1, _map.GetLength(1) / 2);
         
