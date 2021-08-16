@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; } = null;
 
     public static Difficulty DifficultyLevel { get; set; } = Difficulty.NORMAL;
-    public static PlayerCustomisations PlayerCustoms { get; set; } = new PlayerCustomisations() { RGBAColor = Color.white, ColorIndex = 2 };
+    public static PlayerCustomisations PlayerCustoms { get; set; } = new PlayerCustomisations() { RGBAColor = Color.white, ColorIndex = 0 };
 
     public bool Pause { get; set; } = false;
 
@@ -16,7 +16,6 @@ public class GameManager : MonoBehaviour
 
     private Vector2 _playerStartPosition = default;
     private PlayerController _player = null;
-
     
 
     private void Awake()
@@ -70,10 +69,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        //Debug.Log("COLOR " + PlayerColo);
-
-        
-
+      
         Vector2Int mask = new Vector2Int(Random.Range(0, 2), Random.Range(0, 2));
         if (mask.x == 0) mask.x = -1;
         if (mask.y == 0) mask.y = -1;
@@ -99,6 +95,8 @@ public class GameManager : MonoBehaviour
 
 public struct PlayerCustomisations
 {
+    public static PlayerCustomisations Default { get; } = new PlayerCustomisations { ColorIndex = 0, RGBAColor = Color.white };
+
     public Color RGBAColor { get; set; }
     public int ColorIndex { get; set; }
 

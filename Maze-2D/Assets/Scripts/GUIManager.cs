@@ -73,13 +73,14 @@ public class GUIManager : MonoBehaviour
     }
 
     public void SetDifficultyLevel(Slider difficultySlider)
-    {
+    {        
         difficultySlider.value = (float)GameManager.DifficultyLevel;
     }
 
     public void ChangeDifficultyLevel(Slider difficultySlider)
-    {
+    {       
         GameManager.DifficultyLevel = (Difficulty)difficultySlider.value;
+        DeviceStorage.WriteDifficulty(GameManager.DifficultyLevel);
     }
 
     public void SetPlayerColor(ToggleGroup _toggleGroup) {
@@ -94,25 +95,45 @@ public class GUIManager : MonoBehaviour
 
                 currentToggle.isOn = true;
                 break;
-            }
-            
+            }        
         }
-
-
     }
 
     public void ChangePlayerColor(PlayerColorToggle toggle) {
 
-        if (toggle.Info.isOn) GameManager.PlayerCustoms = new PlayerCustomisations() { 
-            
-            RGBAColor = toggle.Sprite.color, 
-            ColorIndex = toggle.transform.GetSiblingIndex() 
-        };         
+        if (toggle.Info.isOn)
+        {
+            GameManager.PlayerCustoms = new PlayerCustomisations()
+            {
+                RGBAColor = toggle.Sprite.color,
+                ColorIndex = toggle.transform.GetSiblingIndex()
+            };
+
+            DeviceStorage.WritePlayerColorIndex(toggle.transform.GetSiblingIndex());
+        }
+        
     }
+
+    private void InitPlayerData() {
+
+        try
+        {
+            GameManager.DifficultyLevel = DeviceStorage.ReadDifficulty();
+            GameManager.PlayerCustoms = DeviceStorage.ReadPlayerCustoms(_playerColors);
+        }
+        catch (DeviceStorageException)
+        {
+            GameManager.DifficultyLevel = Difficulty.EASY;
+            GameManager.PlayerCustoms = PlayerCustomisations.Default;
+        }
+    }
+
 
     private void Awake()
     {
         Instance = this;
+        InitPlayerData();
+
         SetDifficultyLevel(_difficultySlider);
         SetPlayerColor(_playerColors);
     }

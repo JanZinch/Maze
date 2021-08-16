@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\EventSystemSelectRetention.cs" />
     <Compile Include="Assets\Scripts\PlayerColorToggle.cs" />
     <Compile Include="Assets\Scripts\ColorsGroupBehaviour.cs" />
+    <Compile Include="Assets\Scripts\DeviceStorage.cs" />
   </ItemGroup>
   <ItemGroup>
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
